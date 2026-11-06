@@ -176,39 +176,14 @@
 
 <script>
   const answers = [
-    // yes-ish
-    "Yeah, sure. Now get off my lawn.",
-    "Yes. Was that so hard?",
-    "Fine. Yes. Happy now?",
-    "Back in my day that was a yes.",
-    "Yes, but you won't like it.",
-    "Probably. Hand me my glasses.",
-    "My knee says yes. Knee's never wrong.",
-    "Sure, if the Jeep starts.",
-    "Yep. Now quit shaking me.",
-    // no-ish
-    "No. And turn that music down.",
-    "Absolutely not. Ask your mother.",
-    "Nope. Kids these days.",
-    "About as likely as the Jeep passing inspection.",
-    "No. I'm watching my program.",
-    "Heck no. My knee hurts just hearing that.",
-    "No. Don't touch the thermostat either.",
-    "Over my dead body. Which, at this rate...",
-    // maybe / non-answers
-    "Ask me after my nap.",
-    "Looks like the Jeep is leaking oil again.",
-    "Who said that? Speak up!",
-    "Left my glasses in the Jeep. Ask later.",
-    "Hold on, my knee's acting up.",
-    "Ask again when gas is a dollar.",
-    "That's a stupid question. Next.",
-    "Hmph.",
-    "Did you close the door? Were you born in a barn?",
-    "I'll think about it. I won't.",
-    "Go ask the internet, smart guy.",
-    "Let me finish my coffee first.",
-    "In this economy? Maybe.",
+    "Hell no",
+    "My knee hurts",
+    "I don't know, it wasn't me",
+    "Not today, that's a tomorrow thing",
+    "Hell yes",
+    "This is what I think about this place",
+    "My knee hurts",
+    "My Jeep is leaking oil again",
   ];
 
   const mutters = [
@@ -251,7 +226,8 @@
 
     setTimeout(() => {
       ball.classList.remove("shaking");
-      lastIndex = pick(answers, lastIndex);
+      const prev = answers[lastIndex];
+      do { lastIndex = pick(answers, lastIndex); } while (answers[lastIndex] === prev);
       const text = answers[lastIndex];
       answerEl.textContent = text;
       // longer grumbles get smaller text so they fit the triangle

@@ -158,7 +158,7 @@
 <body>
   <header>
     <h1>Magic K-Ball</h1>
-    <p class="sub">Ask Kurt a yes-or-no question. Tap the ball.</p>
+    <p class="sub">Ask Kurt a yes-or-no question. Tap the ball or shake your phone.</p>
   </header>
 
   <div class="stage">
@@ -243,7 +243,53 @@
     }, 850);
   }
 
-  ball.addEventListener("click", ask);
+  // --- Shake to ask ---
+  // iPhones only allow motion after the user taps and approves a prompt,
+  // so we ask for permission on the first tap and turn shake on after that.
+  let motionOn = false;
+  let lastX = null, lastY = null, lastZ = null, lastShake = 0;
+
+  function onMotion(e) {
+    const a = e.accelerationIncludingGravity;
+    if (!a || a.x === null) return;
+    if (lastX !== null) {
+      const delta = Math.abs(a.x - lastX) + Math.abs(a.y - lastY) + Math.abs(a.z - lastZ);
+      const now = Date.now();
+      if (delta > 30 && now - lastShake > 1500) {
+        lastShake = now;
+        ask();
+      }
+    }
+    lastX = a.x; lastY = a.y; lastZ = a.z;
+  }
+
+  function enableMotion() {
+    if (motionOn || typeof DeviceMotionEvent === "undefined") return;
+    if (typeof DeviceMotionEvent.requestPermission === "function") {
+      DeviceMotionEvent.requestPermission()
+        .then(state => {
+          if (state === "granted") {
+            window.addEventListener("devicemotion", onMotion);
+            motionOn = true;
+          }
+        })
+        .catch(() => {});
+    } else {
+      window.addEventListener("devicemotion", onMotion);
+      motionOn = true;
+    }
+  }
+
+  // Android and others don't need a prompt, so shake works right away there
+  if (typeof DeviceMotionEvent !== "undefined" &&
+      typeof DeviceMotionEvent.requestPermission !== "function") {
+    enableMotion();
+  }
+
+  ball.addEventListener("click", () => {
+    enableMotion();
+    ask();
+  });
 </script>
 </body>
 </html>

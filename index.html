@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#14361f">
+<title>Magic K-Ball</title>
+<meta property="og:title" content="Magic K-Ball">
+<meta property="og:description" content="Ask Kurt anything. He'll tell you. Grumpily.">
+<style>
+  :root {
+    --felt: #1d4a2b;
+    --felt-dark: #0e2616;
+    --cream: #f3e9d2;
+    --blue: #1b2fb8;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "Trebuchet MS", "Helvetica Neue", Arial, sans-serif;
+    color: var(--cream);
+    background:
+      radial-gradient(ellipse at 50% 40%, var(--felt) 0%, var(--felt-dark) 75%),
+      var(--felt-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  header { text-align: center; }
+  h1 {
+    margin: 8px 0 2px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(30px, 9vw, 46px);
+    letter-spacing: 2px;
+    text-shadow: 0 3px 0 #000a;
+  }
+  .sub { margin: 0; opacity: .75; font-size: 15px; }
+
+  .stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  .ball {
+    position: relative;
+    width: min(78vw, 360px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    cursor: pointer;
+    background:
+      radial-gradient(circle at 32% 28%, #6b6b6b 0%, #2a2a2a 18%, #0b0b0b 52%, #000 100%);
+    box-shadow:
+      0 30px 50px -10px #000c,
+      inset -18px -22px 40px #000,
+      inset 10px 12px 30px #ffffff14;
+    transition: transform .25s;
+    border: none;
+    padding: 0;
+  }
+  .ball:active { transform: scale(.97); }
+  .shine {
+    position: absolute;
+    top: 9%; left: 20%;
+    width: 30%; height: 18%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, #ffffff70, transparent 70%);
+    transform: rotate(-25deg);
+    pointer-events: none;
+  }
+  /* front face: the "K" */
+  .face, .window {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 46%; aspect-ratio: 1;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity .35s, transform .35s;
+  }
+  .face {
+    background: radial-gradient(circle at 40% 35%, #fff, #e6e6e6 60%, #bdbdbd);
+    box-shadow: inset -4px -6px 10px #0004;
+    color: #111;
+    font-family: Georgia, serif;
+    font-weight: bold;
+    font-size: min(22vw, 100px);
+    line-height: 1;
+  }
+  .window {
+    width: 60%;
+    background: radial-gradient(circle at 50% 45%, #0a0f3a, #000 75%);
+    box-shadow: inset 0 0 18px #000, 0 0 0 5px #1a1a1a;
+    opacity: 0;
+  }
+  .triangle {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / .87;
+    clip-path: polygon(50% 100%, 0 0, 100% 0);
+    background: linear-gradient(180deg, #2a42e0, var(--blue) 60%, #101e85);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 7% 21% 0;
+    opacity: 0;
+    transform: scale(.6) rotate(8deg);
+    filter: blur(4px);
+    transition: opacity .9s ease, transform .9s ease, filter .9s ease;
+  }
+  .triangle.show { opacity: 1; transform: scale(1) rotate(0); filter: blur(0); }
+  .answer {
+    color: #dfe6ff;
+    text-align: center;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: var(--fs, 14px);
+    line-height: 1.15;
+    letter-spacing: .3px;
+    text-shadow: 0 0 6px #8fa2ff;
+    max-width: 100%;
+  }
+  .ball.revealed .face { opacity: 0; transform: translate(-50%, -50%) scale(.7); }
+  .ball.revealed .window { opacity: 1; }
+
+  .ball.shaking { animation: shake .8s cubic-bezier(.36,.07,.19,.97); }
+  @keyframes shake {
+    0%,100% { transform: translate(0,0) rotate(0); }
+    10% { transform: translate(-14px, 6px) rotate(-8deg); }
+    20% { transform: translate(12px, -8px) rotate(7deg); }
+    30% { transform: translate(-16px, -4px) rotate(-9deg); }
+    40% { transform: translate(14px, 8px) rotate(8deg); }
+    50% { transform: translate(-10px, -6px) rotate(-6deg); }
+    60% { transform: translate(10px, 4px) rotate(5deg); }
+    70% { transform: translate(-6px, 2px) rotate(-3deg); }
+    80% { transform: translate(4px, -2px) rotate(2deg); }
+    90% { transform: translate(-2px, 1px) rotate(-1deg); }
+  }
+
+  .speech {
+    min-height: 54px;
+    max-width: 360px;
+    text-align: center;
+    font-size: 16px;
+    opacity: .85;
+    font-style: italic;
+  }
+  footer { text-align: center; font-size: 13px; opacity: .55; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Magic K-Ball</h1>
+    <p class="sub">Ask Kurt a yes-or-no question. Tap the ball.</p>
+  </header>
+
+  <div class="stage">
+    <button class="ball" id="ball" aria-label="Ask the Magic K-Ball">
+      <div class="shine"></div>
+      <div class="face">K</div>
+      <div class="window">
+        <div class="triangle" id="tri"><div class="answer" id="answer"></div></div>
+      </div>
+    </button>
+  </div>
+
+  <div class="speech" id="speech">*Kurt is napping in his recliner*</div>
+  <footer>Tap again to bother him again.</footer>
+
+<script>
+  const answers = [
+    // yes-ish
+    "Yeah, sure. Now get off my lawn.",
+    "Yes. Was that so hard?",
+    "Fine. Yes. Happy now?",
+    "Back in my day that was a yes.",
+    "Yes, but you won't like it.",
+    "Probably. Hand me my glasses.",
+    "My knee says yes. Knee's never wrong.",
+    "Sure, if the Jeep starts.",
+    "Yep. Now quit shaking me.",
+    // no-ish
+    "No. And turn that music down.",
+    "Absolutely not. Ask your mother.",
+    "Nope. Kids these days.",
+    "About as likely as the Jeep passing inspection.",
+    "No. I'm watching my program.",
+    "Heck no. My knee hurts just hearing that.",
+    "No. Don't touch the thermostat either.",
+    "Over my dead body. Which, at this rate...",
+    // maybe / non-answers
+    "Ask me after my nap.",
+    "Looks like the Jeep is leaking oil again.",
+    "Who said that? Speak up!",
+    "Left my glasses in the Jeep. Ask later.",
+    "Hold on, my knee's acting up.",
+    "Ask again when gas is a dollar.",
+    "That's a stupid question. Next.",
+    "Hmph.",
+    "Did you close the door? Were you born in a barn?",
+    "I'll think about it. I won't.",
+    "Go ask the internet, smart guy.",
+    "Let me finish my coffee first.",
+    "In this economy? Maybe.",
+  ];
+
+  const mutters = [
+    "*grumbles from the recliner*",
+    "*rattles the ball like a wrench drawer*",
+    "*sighs the sigh of a man with one good knee*",
+    "*wipes oil off his hands*",
+    "*squints at you over his glasses*",
+    "*adjusts his gym shorts*",
+    "*mutters about the price of coffee*",
+  ];
+
+  const ball = document.getElementById("ball");
+  const tri = document.getElementById("tri");
+  const answerEl = document.getElementById("answer");
+  const speech = document.getElementById("speech");
+
+  let busy = false;
+  let lastIndex = -1;
+
+  function pick(list, avoid) {
+    let i;
+    do { i = Math.floor(Math.random() * list.length); } while (list.length > 1 && i === avoid);
+    return i;
+  }
+
+  function ask() {
+    if (busy) return;
+    busy = true;
+
+    tri.classList.remove("show");
+    ball.classList.remove("revealed");
+    speech.textContent = mutters[pick(mutters, -1)];
+
+    // restart the shake animation
+    ball.classList.remove("shaking");
+    void ball.offsetWidth;
+    ball.classList.add("shaking");
+    if (navigator.vibrate) navigator.vibrate([40, 40, 40]);
+
+    setTimeout(() => {
+      ball.classList.remove("shaking");
+      lastIndex = pick(answers, lastIndex);
+      const text = answers[lastIndex];
+      answerEl.textContent = text;
+      // longer grumbles get smaller text so they fit the triangle
+      const w = ball.offsetWidth;
+      const base = text.length <= 22 ? 0.05 : text.length <= 34 ? 0.042 : 0.036;
+      answerEl.style.setProperty("--fs", Math.round(w * base) + "px");
+      ball.classList.add("revealed");
+      setTimeout(() => {
+        tri.classList.add("show");
+        speech.textContent = "Kurt has spoken.";
+        busy = false;
+      }, 250);
+    }, 850);
+  }
+
+  ball.addEventListener("click", ask);
+</script>
+</body>
+</html>
